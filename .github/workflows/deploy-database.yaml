@@ -26,16 +26,17 @@ jobs:
     runs-on: self-hosted
     needs: filter
     if: needs.filter.outputs.database == 'true'
-    env:
-      KUBECTL_VERSION: v1.33.2
-      KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-      - name: Test kubectl access
+      - name: Setup kubeconfig
         run: |
-          export KUBECONFIG=$HOME/.kube/config
-          kubectl get nodes
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}"
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+      - name: Test kubectl access
+        run: kubectl get nodes
 
       # - name: Apply PersistentVolume
       #   run: kubectl apply -f database/PersistentVolume.yml --validate=false
