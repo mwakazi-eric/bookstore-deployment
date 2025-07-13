@@ -35,9 +35,11 @@ jobs:
       - name: Setup kubeconfig
         run: |
           mkdir -p ~/.kube
+          cat "${{ secrets.KUBE_CONFIG_DATA_K8S }}"
           echo "${{ secrets.KUBE_CONFIG_DATA_K8S }}" > ~/.kube/config
           chmod 600 ~/.kube/config
           export KUBECONFIG=$HOME/.kube/config
+
 
       - name: Test kubectl access
         run: |
