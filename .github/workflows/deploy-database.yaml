@@ -1,33 +1,54 @@
-name: Database deployment to Kubernetes
+name: Deploy MySQL on Database Changes
 
 on:
   push:
-    branches:
-      - main
+    branches: [staging]
     paths:
       - 'database/**'
 
 jobs:
-  deploy:
-    runs-on: self-hosted  # ✅ Runs on your local runner
-
+  filter:
+    runs-on: ubuntu-latest
+    outputs:
+      database: ${{ steps.filter.outputs.database }}
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-    - name: Set up kubeconfig from secret (plaintext)
-      run: |
-        mkdir -p ~/.kube
-        echo "${{ secrets.KUBE_CONFIG_DATA_K8S }}" > ~/.kube/config
+      - name: Filter for /database changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            database:
+              - 'database/**'
 
-    - name: Apply mysql-deployment.yml if any /database file changed
-      run: |
-        CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^database/' || true)
+  deploy-mysql:
+    name: Apply MySQL K8s Resources
+    needs: filter
+    if: needs.filter.outputs.database == 'true'
+    runs-on: self-hosted  # ✅ this targets your local runner
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-        if [ -z "$CHANGED" ]; then
-          echo "✅ No changes in database/, skipping apply."
-          exit 0
-        fi
+      - name: Setup kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG_DATA_K8S }}" > ~/.kube/config
 
-        echo "🚀 Detected changes in database/. Applying mysql-deployment.yml"
-        kubectl apply -f database/mysql-deployment.yml
+      - name: Apply PersistentVolume
+        run: |
+          kubectl apply -f database/PersistentVolume.yml
+
+      - name: Apply PersistentVolumeClaim
+        run: |
+          kubectl apply -f database/PersistentVolumeClaim.yml
+
+      - name: Apply MySQL pod deployment
+        run: |
+          kubectl apply -f database/deployment.yml
+
+      - name: Apply MySQL Service
+        run: |
+          kubectl apply -f database/service.yml
