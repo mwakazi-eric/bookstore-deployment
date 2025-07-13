@@ -1,50 +1,31 @@
-name: Deploy MySQL Database Changes
-
+name: Reddit Database Deployment
 on:
   push:
     branches: [main]
-    paths:
-      - 'database/**'
-
 jobs:
-  filter:
-    runs-on: [self-hosted, Linux, X64]
-    outputs:
-      database: ${{ steps.filter.outputs.database }}
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-      - name: Filter changes
-        id: filter
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            database:
-              - 'database/**'
-
-  deploy-mysql:
-    runs-on: [self-hosted, Linux, X64]
-    needs: filter
+  build-and-deploy:
+    timeout-minutes: 12
+    runs-on: [self-hosted]
     env:
-      KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
-    if: needs.filter.outputs.database == 'true'
-    env:
-      KUBECONFIG: $HOME/.kube/config
+      KUBECTL_VERSION: v1.33.2
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
       - name: Test kubectl access
-        run: |
-          kubectl get nodes
+        uses: steebchen/kubectl@v2.0.0
+        with:
+          config: ${{secrets.KUBE_CONFIG_DATA_K8S}}
+          version: ${{ env.KUBECTL_VERSION }}
+          command: kubectl get nodes
 
-      - name: Apply PersistentVolume
-        run: kubectl apply -f database/PersistentVolume.yml --validate=false
+      # - name: Apply PersistentVolume
+      #   run: kubectl apply -f database/PersistentVolume.yml --validate=false
 
-      - name: Apply PersistentVolumeClaim
-        run: kubectl apply -f database/PersistentVolumeClaim.yml --validate=false
+      # - name: Apply PersistentVolumeClaim
+      #   run: kubectl apply -f database/PersistentVolumeClaim.yml --validate=false
 
-      - name: Apply MySQL deployment
-        run: kubectl apply -f database/deployment.yml --validate=false
+      # - name: Apply MySQL deployment
+      #   run: kubectl apply -f database/deployment.yml --validate=false
 
-      - name: Apply MySQL service
-        run: kubectl apply -f database/service.yml --validate=false
+      # - name: Apply MySQL service
+      #   run: kubectl apply -f database/service.yml --validate=false
