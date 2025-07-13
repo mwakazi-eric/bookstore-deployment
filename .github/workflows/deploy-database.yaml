@@ -27,33 +27,31 @@ jobs:
     needs: filter
     if: needs.filter.outputs.database == 'true'
     env:
-      KUBECONFIG: $HOME/.kube/config
+      KUBECTL_VERSION: v1.33.2
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBE_CONFIG }}"
-          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
-          chmod 600 ~/.kube/config
-          export KUBECONFIG=$HOME/.kube/config
-
-
       - name: Test kubectl access
-        run: |
-          export KUBECONFIG=$HOME/.kube/config
-          kubectl get nodes
+        uses: steebchen/kubectl@v2.0.0
+        with:
+          config: ${{ secrets.KUBE_CONFIG }}
+          version: ${{ env.KUBECTL_VERSION }}
+          command: get nodes
 
-      - name: Apply PersistentVolume
-        run: kubectl apply -f database/PersistentVolume.yml --validate=false
+      # - name: Test kubectl access
+      #   run: |
+      #     export KUBECONFIG=$HOME/.kube/config
+      #     kubectl get nodes
 
-      - name: Apply PersistentVolumeClaim
-        run: kubectl apply -f database/PersistentVolumeClaim.yml --validate=false
+      # - name: Apply PersistentVolume
+      #   run: kubectl apply -f database/PersistentVolume.yml --validate=false
 
-      - name: Apply MySQL deployment
-        run: kubectl apply -f database/deployment.yml --validate=false
+      # - name: Apply PersistentVolumeClaim
+      #   run: kubectl apply -f database/PersistentVolumeClaim.yml --validate=false
 
-      - name: Apply MySQL service
-        run: kubectl apply -f database/service.yml --validate=false
+      # - name: Apply MySQL deployment
+      #   run: kubectl apply -f database/deployment.yml --validate=false
+
+      # - name: Apply MySQL service
+      #   run: kubectl apply -f database/service.yml --validate=false
