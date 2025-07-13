@@ -7,16 +7,9 @@ jobs:
     timeout-minutes: 12
     runs-on: [self-hosted]
     env:
-      KUBECTL_VERSION: v1.33.2
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Test kubectl access
-        uses: steebchen/kubectl@v2.0.0
-        with:
-          config: ${{secrets.KUBE_CONFIG_DATA_K8S}}
-          version: ${{ env.KUBECTL_VERSION }}
-          command: kubectl get nodes
 
       # - name: Apply PersistentVolume
       #   run: kubectl apply -f database/PersistentVolume.yml --validate=false
