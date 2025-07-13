@@ -35,17 +35,15 @@ jobs:
           echo "${{ secrets.KUBE_CONFIG }}"
           echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
           chmod 600 ~/.kube/config
-      - name: Test kubectl access
-        run: kubectl get nodes
 
-      # - name: Apply PersistentVolume
-      #   run: kubectl apply -f database/PersistentVolume.yml --validate=false
+      - name: Apply PersistentVolume
+        run: kubectl apply -f database/PersistentVolume.yml
 
-      # - name: Apply PersistentVolumeClaim
-      #   run: kubectl apply -f database/PersistentVolumeClaim.yml --validate=false
+      - name: Apply PersistentVolumeClaim
+        run: kubectl apply -f database/PersistentVolumeClaim.yml
 
-      # - name: Apply MySQL deployment
-      #   run: kubectl apply -f database/deployment.yml --validate=false
+      - name: Apply MySQL deployment
+        run: kubectl apply -f database/deployment.yml
 
-      # - name: Apply MySQL service
-      #   run: kubectl apply -f database/service.yml --validate=false
+      - name: Apply MySQL service
+        run: kubectl apply -f database/service.yml
