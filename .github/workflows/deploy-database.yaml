@@ -37,9 +37,12 @@ jobs:
           mkdir -p ~/.kube
           echo "${{ secrets.KUBE_CONFIG_DATA_K8S }}" > ~/.kube/config
           chmod 600 ~/.kube/config
+          export KUBECONFIG=$HOME/.kube/config
 
       - name: Test kubectl access
-        run: kubectl get nodes
+        run: |
+          export KUBECONFIG=$HOME/.kube/config
+          kubectl get nodes
 
       - name: Apply PersistentVolume
         run: kubectl apply -f database/PersistentVolume.yml --validate=false
