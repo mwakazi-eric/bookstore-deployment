@@ -1,0 +1,45 @@
+name: Database deployment to Kubernetes
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'database/*.yml'
+      - 'database/*.yaml'
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.33.2'
+
+    - name: Write kubeconfig directly from secret
+      run: |
+        mkdir -p ~/.kube
+        echo "${{ secrets.KUBE_CONFIG_DATA_K8S }}" > ~/.kube/config
+
+    - name: Apply only changed Kubernetes files
+      run: |
+        FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^database/.*\.ya\?ml$' || true)
+
+        if [ -z "$FILES" ]; then
+          echo "✅ No Kubernetes files changed in database/"
+          exit 0
+        fi
+
+        echo "🚀 Changed Kubernetes files:"
+        echo "$FILES"
+
+        for file in $FILES; do
+          echo "🔧 Applying $file..."
+          kubectl apply -f "$file" --namespace=reddit
+        done
