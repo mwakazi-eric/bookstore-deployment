@@ -1,8 +1,8 @@
-name: Deploy MySQL on Database Changes
+name: Deploy MySQL Database Changes
 
 on:
   push:
-    branches: [staging]
+    branches: [main]
     paths:
       - 'database/**'
 
