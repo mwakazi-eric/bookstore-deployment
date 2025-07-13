@@ -32,18 +32,10 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-      - name: Current user
-        run: whoami
       - name: Test kubectl access
-        uses: steebchen/kubectl@v2.0.0
-        with:
-          config: ${{ secrets.KUBE_CONFIG }}
-          version: ${{ env.KUBECTL_VERSION }}
-          command: get nodes
-      # - name: Test kubectl access
-      #   run: |
-      #     export KUBECONFIG=$HOME/.kube/config
-      #     kubectl get nodes
+        run: |
+          export KUBECONFIG=$HOME/.kube/config
+          kubectl get nodes
 
       # - name: Apply PersistentVolume
       #   run: kubectl apply -f database/PersistentVolume.yml --validate=false
