@@ -7,6 +7,21 @@ on:
       - 'database/**'
 
 jobs:
+  filter:
+    runs-on: ubuntu-latest
+    outputs:
+      database: ${{ steps.filter.outputs.database }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Filter changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            database:
+              - 'database/**'
+
   deploy-mysql:
     runs-on: self-hosted
     needs: filter
