@@ -23,7 +23,7 @@ jobs:
               - 'database/**'
 
   deploy-mysql:
-    runs-on: self-hosted
+    runs-on: [self-hosted, Linux, X64]
     needs: filter
     if: needs.filter.outputs.database == 'true'
     env:
