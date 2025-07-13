@@ -1,15 +1,17 @@
-name: Reddit Database Deployment
+name: Deploy to Kubernetes
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+
 jobs:
-  build-and-deploy:
-    timeout-minutes: 12
-    runs-on: [self-hosted]
-    env:
+  deploy:
+    runs-on: "self-hosted"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
+
+	 # (...)
 
       # - name: Apply PersistentVolume
       #   run: kubectl apply -f database/PersistentVolume.yml --validate=false
