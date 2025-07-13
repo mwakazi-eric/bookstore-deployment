@@ -35,8 +35,8 @@ jobs:
       - name: Setup kubeconfig
         run: |
           mkdir -p ~/.kube
-          echo "${{ secrets.KUBE_CONFIG_DATA_K8S }}"
-          echo "${{ secrets.KUBE_CONFIG_DATA_K8S }}" > ~/.kube/config
+          echo "${{ secrets.KUBE_CONFIG }}"
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
           chmod 600 ~/.kube/config
           export KUBECONFIG=$HOME/.kube/config
 
