@@ -28,16 +28,15 @@ jobs:
     if: needs.filter.outputs.database == 'true'
     env:
       KUBECTL_VERSION: v1.33.2
+      KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Test kubectl access
-        uses: steebchen/kubectl@v2.0.0
+        uses: actions-hub/kubectl@master
         with:
-          config: ${{ secrets.KUBE_CONFIG }}
-          version: ${{ env.KUBECTL_VERSION }}
-          command: get nodes
+          args: get nodes
 
       # - name: Test kubectl access
       #   run: |
