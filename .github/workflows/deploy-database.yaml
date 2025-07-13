@@ -8,7 +8,7 @@ on:
 
 jobs:
   filter:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     outputs:
       database: ${{ steps.filter.outputs.database }}
     steps:
@@ -25,8 +25,6 @@ jobs:
   deploy-mysql:
     runs-on: self-hosted
     needs: filter
-    env:
-      KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
     if: needs.filter.outputs.database == 'true'
     env:
       KUBECONFIG: $HOME/.kube/config
@@ -34,8 +32,18 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Setup kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG_DATA_K8S }}"
+          echo "${{ secrets.KUBE_CONFIG_DATA_K8S }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+          export KUBECONFIG=$HOME/.kube/config
+
+
       - name: Test kubectl access
         run: |
+          export KUBECONFIG=$HOME/.kube/config
           kubectl get nodes
 
       - name: Apply PersistentVolume
