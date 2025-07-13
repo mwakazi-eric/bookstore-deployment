@@ -7,27 +7,12 @@ on:
       - 'database/**'
 
 jobs:
-  filter:
-    runs-on: ubuntu-latest
-    outputs:
-      database: ${{ steps.filter.outputs.database }}
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Filter for /database changes
-        id: filter
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            database:
-              - 'database/**'
-
   deploy-mysql:
-    name: Apply MySQL K8s Resources
+    runs-on: self-hosted
     needs: filter
     if: needs.filter.outputs.database == 'true'
-    runs-on: self-hosted  # ✅ this targets your local runner
+    env:
+      KUBECONFIG: $HOME/.kube/config
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -36,19 +21,19 @@ jobs:
         run: |
           mkdir -p ~/.kube
           echo "${{ secrets.KUBE_CONFIG_DATA_K8S }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Test kubectl access
+        run: kubectl get nodes
 
       - name: Apply PersistentVolume
-        run: |
-          kubectl apply -f database/PersistentVolume.yml
+        run: kubectl apply -f database/PersistentVolume.yml --validate=false
 
       - name: Apply PersistentVolumeClaim
-        run: |
-          kubectl apply -f database/PersistentVolumeClaim.yml
+        run: kubectl apply -f database/PersistentVolumeClaim.yml --validate=false
 
-      - name: Apply MySQL pod deployment
-        run: |
-          kubectl apply -f database/deployment.yml
+      - name: Apply MySQL deployment
+        run: kubectl apply -f database/deployment.yml --validate=false
 
-      - name: Apply MySQL Service
-        run: |
-          kubectl apply -f database/service.yml
+      - name: Apply MySQL service
+        run: kubectl apply -f database/service.yml --validate=false
