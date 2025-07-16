@@ -24,22 +24,22 @@ spec:
           - name: MYSQL_DATABASE
             valueFrom:
               configMapKeyRef:
-                name: redditConfigMap
+                name: reddit-configmap
                 key: MYSQL_DATABASE
           - name: MYSQL_USER
             valueFrom:
               configMapKeyRef:
-                name: redditConfigMap
+                name: reddit-configmap
                 key: MYSQL_USER
           - name: MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: redditSecrets
+                name: reddit-secrets
                 key: MYSQL_PASSWORD
           - name: MYSQL_ROOT_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: redditSecrets
+                name: reddit-secrets
                 key: MYSQL_ROOT_PASSWORD
         ports:
         - containerPort: 33006

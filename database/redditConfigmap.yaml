@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: redditConfigMap
+  name: reddit-configmap
   namespace: reddit
 data:
   MYSQL_DATABASE: reddit_db
