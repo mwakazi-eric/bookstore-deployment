@@ -46,3 +46,15 @@ spec:
             configMapKeyRef:
               name: reddit-configmap
               key: MYSQL_DATABASE
+
+        - name: SPRING_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: reddit-secrets
+              key: APP_EMAIL
+
+        - name: SPRING_EMAIL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: reddit-secrets
+              key: APP_PASSWORD
