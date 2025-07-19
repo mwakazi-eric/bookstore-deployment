@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reddit-fe
+  namespace: reddit
+  labels:
+    app: reddit-fe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reddit-fe
+  template:
+    metadata:
+      labels:
+        app: reddit-fe
+    spec:
+      containers:
+      - name: reddit-fe
+        image: mwakazi/reddit-fe:staging
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
