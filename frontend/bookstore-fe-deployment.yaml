@@ -6,7 +6,7 @@ metadata:
   labels:
     app: bookstore-dev-fe
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: bookstore-dev-fe
