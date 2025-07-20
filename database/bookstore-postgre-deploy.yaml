@@ -10,8 +10,7 @@ metadata:
   namespace: bookstore-dev
 type: Opaque
 stringData:
-  MYSQL_ROOT_PASSWORD: my-secret-pw
-  MYSQL_PASSWORD: bookstore-dev_password
+  POSTGRES_PASSWORD: bookstore_dev_password
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -20,21 +19,9 @@ metadata:
   namespace: bookstore-dev
 data:
   init.sql: |
-    CREATE DATABASE IF NOT EXISTS `bookstore-dev_db`;
-
-    -- For remote TCP access (e.g., app pods)
-    CREATE USER IF NOT EXISTS 'bookstore-dev_user'@'%' IDENTIFIED BY 'bookstore-dev_password';
-
-    GRANT ALL PRIVILEGES ON `bookstore-dev_db`.* TO 'bookstore-dev_user'@'%';
-
-    -- For local (socket) access like inside MySQL pod
-    CREATE USER IF NOT EXISTS 'bookstore-dev_user'@'localhost' IDENTIFIED BY 'bookstore-dev_password';
-    GRANT ALL PRIVILEGES ON `bookstore-dev_db`.* TO 'bookstore-dev_user'@'localhost';
-
-    FLUSH PRIVILEGES;
-  MYSQL_DATABASE: bookstore-dev_db
-  MYSQL_USER: bookstore-dev_user
-
+    CREATE DATABASE bookstore_dev_db;
+    CREATE USER bookstore_dev_user WITH ENCRYPTED PASSWORD 'bookstore_dev_password';
+    GRANT ALL PRIVILEGES ON DATABASE bookstore_dev_db TO bookstore_dev_user;
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -48,9 +35,9 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /mnt/data/mysql # Must exist on the host node
+    path: /mnt/data/postgres
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: ""  # ✅ Explicitly mark it as no storage class
+  storageClassName: ""
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -66,53 +53,57 @@ spec:
     requests:
       storage: 1Gi
   volumeName: bookstore-pv
-  storageClassName: ""  # ✅ Match with the PV (no dynamic storage class)
+  storageClassName: ""
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mysql
+  name: postgres
   namespace: bookstore-dev
 spec:
   selector:
-    app: mysql
+    app: postgres
   ports:
-    - port: 3306
-      targetPort: 3306
+    - port: 5432
+      targetPort: 5432
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql
+  name: postgres
   namespace: bookstore-dev
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mysql
+      app: postgres
   template:
     metadata:
       labels:
-        app: mysql
+        app: postgres
     spec:
       containers:
-        - name: mysql
-          image: mysql:8
+        - name: postgres
+          image: postgres:16
           ports:
-            - containerPort: 3306
+            - containerPort: 5432
           env:
-            - name: MYSQL_ROOT_PASSWORD
+            - name: POSTGRES_DB
+              value: bookstore_dev_db
+            - name: POSTGRES_USER
+              value: bookstore_dev_user
+            - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: bookstore-dev-secrets
-                  key: MYSQL_ROOT_PASSWORD
+                  key: POSTGRES_PASSWORD
           volumeMounts:
-            - name: mysql-data
-              mountPath: /var/lib/mysql
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
             - name: init-script
               mountPath: /docker-entrypoint-initdb.d
       volumes:
-        - name: mysql-data
+        - name: postgres-data
           persistentVolumeClaim:
             claimName: bookstore-pvc
         - name: init-script
