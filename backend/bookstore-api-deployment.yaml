@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: bookstore-dev-api
-        image: mwakazi/bookstore-api:dev
+        image: mwakazi/bookstore-dev-api
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
