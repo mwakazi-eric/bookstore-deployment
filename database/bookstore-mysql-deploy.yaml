@@ -37,8 +37,9 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /mnt/data/mysql # 📝 Must exist on host
+    path: /mnt/data/mysql # Must exist on the host node
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""  # ✅ Explicitly mark it as no storage class
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -53,7 +54,8 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  volumeName: bookstore-pv # 🧠 Bind to static PV
+  volumeName: bookstore-pv
+  storageClassName: ""  # ✅ Match with the PV (no dynamic storage class)
 ---
 apiVersion: v1
 kind: Service
