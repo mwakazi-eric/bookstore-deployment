@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: bookstore-dev-fe
-        image: mwakazi/bookstore-dev-fe:staging
+        image: mwakazi/bookstore-dev-fe:dev
         imagePullPolicy: Always
         ports:
         - containerPort: 80
