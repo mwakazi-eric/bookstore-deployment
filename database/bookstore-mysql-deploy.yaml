@@ -20,10 +20,40 @@ metadata:
   namespace: bookstore-dev
 data:
   init.sql: |
-    CREATE DATABASE IF NOT EXISTS bookstore-dev_db;
+    CREATE DATABASE IF NOT EXISTS `bookstore-dev_db`;
     CREATE USER IF NOT EXISTS 'bookstore-dev_user'@'%' IDENTIFIED BY 'bookstore-dev_password';
-    GRANT ALL PRIVILEGES ON bookstore-dev_db.* TO 'bookstore-dev_user'@'%';
+    GRANT ALL PRIVILEGES ON `bookstore-dev_db`.* TO 'bookstore-dev_user'@'%';
     FLUSH PRIVILEGES;
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: bookstore-pv
+  labels:
+    app: bookstore
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/mysql # 📝 Must exist on host
+  persistentVolumeReclaimPolicy: Retain
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bookstore-pvc
+  namespace: bookstore-dev
+  labels:
+    app: bookstore
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: bookstore-pv # 🧠 Bind to static PV
 ---
 apiVersion: v1
 kind: Service
@@ -43,30 +73,35 @@ metadata:
   name: mysql
   namespace: bookstore-dev
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: mysql
-  replicas: 1
   template:
     metadata:
       labels:
         app: mysql
     spec:
       containers:
-      - name: mysql
-        image: mysql:8
-        ports:
-          - containerPort: 3306
-        env:
-          - name: MYSQL_ROOT_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: bookstore-dev-secrets
-                key: MYSQL_ROOT_PASSWORD
-        volumeMounts:
-          - name: init-script
-            mountPath: /docker-entrypoint-initdb.d
+        - name: mysql
+          image: mysql:8
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bookstore-dev-secrets
+                  key: MYSQL_ROOT_PASSWORD
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+            - name: init-script
+              mountPath: /docker-entrypoint-initdb.d
       volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: bookstore-pvc
         - name: init-script
           configMap:
             name: mysql-initdb-config
