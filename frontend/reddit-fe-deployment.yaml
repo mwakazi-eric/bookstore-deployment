@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: reddit-fe
-  namespace: reddit
+  name: bookstore-dev-fe
+  namespace: bookstore-dev
   labels:
-    app: reddit-fe
+    app: bookstore-dev-fe
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: reddit-fe
+      app: bookstore-dev-fe
   template:
     metadata:
       labels:
-        app: reddit-fe
+        app: bookstore-dev-fe
     spec:
       containers:
-      - name: reddit-fe
-        image: mwakazi/reddit-fe:staging
+      - name: bookstore-dev-fe
+        image: mwakazi/bookstore-dev-fe:staging
         imagePullPolicy: Always
         ports:
         - containerPort: 80
