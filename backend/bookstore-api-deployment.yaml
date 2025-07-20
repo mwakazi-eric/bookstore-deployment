@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookstore-dev-api
+  namespace: bookstore-dev
+  labels:
+    app: bookstore-dev-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bookstore-dev-api
+  template:
+    metadata:
+      labels:
+        app: bookstore-dev-api
+    spec:
+      containers:
+      - name: bookstore-dev-api
+        image: mwakazi/bookstore-api:dev
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+      env:
+        - name: DB_HOST
+          value: mysql.bookstore-dev.svc.cluster.local
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: bookstore-dev-configmap
+              key: MYSQL_DATABASE
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: bookstore-dev-configmap
+              key: MYSQL_USER
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: bookstore-dev-secrets
+              key: MYSQL_PASSWORD
+
