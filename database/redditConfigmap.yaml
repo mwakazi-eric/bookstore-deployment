@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: reddit-configmap
-  namespace: reddit
-data:
-  MYSQL_DATABASE: reddit_db
-  MYSQL_USER: reddit_user

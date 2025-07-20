@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb-config
+  namespace: bookstore-dev
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS bookstore_db;
+    CREATE USER IF NOT EXISTS 'bookstore_user'@'%' IDENTIFIED BY 'bookstore_password';
+    GRANT ALL PRIVILEGES ON bookstore_db.* TO 'bookstore_user'@'%';
+    FLUSH PRIVILEGES;

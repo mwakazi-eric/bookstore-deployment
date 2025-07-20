@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: mysql-pv
-  namespace: reddit
+  name: bookstore-pv
+  namespace: bookstore-dev
   labels:
-    app: mysql
+    app: bookstore
 spec:
   capacity:
     storage: 1Gi

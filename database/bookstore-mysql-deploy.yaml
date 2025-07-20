@@ -1,35 +1,35 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: reddit
+  name: bookstore-dev
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: reddit-secrets
-  namespace: reddit
+  name: bookstore-dev-secrets
+  namespace: bookstore-dev
 type: Opaque
 stringData:
   MYSQL_ROOT_PASSWORD: my-secret-pw
-  MYSQL_PASSWORD: reddit_password
+  MYSQL_PASSWORD: bookstore-dev_password
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: mysql-initdb-config
-  namespace: reddit
+  namespace: bookstore-dev
 data:
   init.sql: |
-    CREATE DATABASE IF NOT EXISTS reddit_db;
-    CREATE USER IF NOT EXISTS 'reddit_user'@'%' IDENTIFIED BY 'reddit_password';
-    GRANT ALL PRIVILEGES ON reddit_db.* TO 'reddit_user'@'%';
+    CREATE DATABASE IF NOT EXISTS bookstore-dev_db;
+    CREATE USER IF NOT EXISTS 'bookstore-dev_user'@'%' IDENTIFIED BY 'bookstore-dev_password';
+    GRANT ALL PRIVILEGES ON bookstore-dev_db.* TO 'bookstore-dev_user'@'%';
     FLUSH PRIVILEGES;
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: mysql
-  namespace: reddit
+  namespace: bookstore-dev
 spec:
   selector:
     app: mysql
@@ -41,7 +41,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mysql
-  namespace: reddit
+  namespace: bookstore-dev
 spec:
   selector:
     matchLabels:
@@ -61,7 +61,7 @@ spec:
           - name: MYSQL_ROOT_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: reddit-secrets
+                name: bookstore-dev-secrets
                 key: MYSQL_ROOT_PASSWORD
         volumeMounts:
           - name: init-script

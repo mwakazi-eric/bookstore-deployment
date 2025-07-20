@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookstore-mysql
+  namespace: bookstore-dev
+spec:
+  selector:
+    matchLabels:
+      app: bookstore-mysql
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bookstore-mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8
+        ports:
+          - containerPort: 3306
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: bookstore-secrets
+                key: MYSQL_ROOT_PASSWORD
+        volumeMounts:
+          - name: init-script
+            mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: init-script
+          configMap:
+            name: mysql-initdb-config
