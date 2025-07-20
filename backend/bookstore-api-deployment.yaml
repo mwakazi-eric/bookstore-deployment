@@ -21,24 +21,23 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
-      env:
+        env:
         - name: DB_HOST
-          value: mysql.bookstore-dev.svc.cluster.local
+          value: postgres.bookstore-dev.svc.cluster.local
         - name: DB_PORT
-          value: "3306"
+          value: "5432"
         - name: DB_NAME
           valueFrom:
             configMapKeyRef:
               name: bookstore-dev-configmap
-              key: MYSQL_DATABASE
+              key: POSTGRES_DB
         - name: SPRING_DATASOURCE_USERNAME
           valueFrom:
             configMapKeyRef:
               name: bookstore-dev-configmap
-              key: MYSQL_USER
+              key: POSTGRES_USER
         - name: SPRING_DATASOURCE_PASSWORD
           valueFrom:
             secretKeyRef:
               name: bookstore-dev-secrets
-              key: MYSQL_PASSWORD
-
+              key: POSTGRES_PASSWORD
