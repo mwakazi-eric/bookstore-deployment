@@ -18,10 +18,13 @@ metadata:
   name: bookstore-dev-configmap
   namespace: bookstore-dev
 data:
+  POSTGRES_DB: bookstore_dev_db
+  POSTGRES_USER: bookstore_dev_user
   init.sql: |
     CREATE DATABASE bookstore_dev_db;
     CREATE USER bookstore_dev_user WITH ENCRYPTED PASSWORD 'bookstore_dev_password';
     GRANT ALL PRIVILEGES ON DATABASE bookstore_dev_db TO bookstore_dev_user;
+
 ---
 apiVersion: v1
 kind: PersistentVolume

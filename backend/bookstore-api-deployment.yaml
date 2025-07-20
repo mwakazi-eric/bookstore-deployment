@@ -1,59 +1,43 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres
+  name: bookstore-dev-api
   namespace: bookstore-dev
+  labels:
+    app: bookstore-dev-api
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: postgres
+      app: bookstore-dev-api
   template:
     metadata:
       labels:
-        app: postgres
+        app: bookstore-dev-api
     spec:
-      initContainers:
-        - name: copy-init-sql
-          image: busybox
-          command:
-            - sh
-            - -c
-            - |
-              mkdir -p /docker-entrypoint-initdb.d && \
-              echo "$INIT_SQL" > /docker-entrypoint-initdb.d/init.sql
-          env:
-            - name: INIT_SQL
-              valueFrom:
-                configMapKeyRef:
-                  name: bookstore-dev-configmap
-                  key: init.sql
-          volumeMounts:
-            - name: init-script
-              mountPath: /docker-entrypoint-initdb.d
       containers:
-        - name: postgres
-          image: postgres:16
-          ports:
-            - containerPort: 5432
-          env:
-            - name: POSTGRES_DB
-              value: bookstore_dev_db
-            - name: POSTGRES_USER
-              value: bookstore_dev_user
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: bookstore-dev-secrets
-                  key: POSTGRES_PASSWORD
-          volumeMounts:
-            - name: postgres-data
-              mountPath: /var/lib/postgresql/data
-            - name: init-script
-              mountPath: /docker-entrypoint-initdb.d
-      volumes:
-        - name: postgres-data
-          persistentVolumeClaim:
-            claimName: bookstore-pvc
-        - name: init-script
-          emptyDir: {}
+      - name: bookstore-dev-api
+        image: mwakazi/bookstore-api:dev
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_HOST
+          value: postgres.bookstore-dev.svc.cluster.local
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: bookstore-dev-configmap
+              key: POSTGRES_DB
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: bookstore-dev-configmap
+              key: POSTGRES_USER
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: bookstore-dev-secrets
+              key: POSTGRES_PASSWORD
