@@ -38,9 +38,9 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /mnt/data/postgres
+    path: /mnt/data/mysql
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: ""
+  volumeMode: Filesystem
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
