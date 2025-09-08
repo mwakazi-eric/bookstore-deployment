@@ -1,14 +1,15 @@
-name: Create Release
+name: Tag Version
 on:
   push:
     branches:
       - main
 
 jobs:
-  release:
+  bump-tag:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Bump version and push tag
         uses: anothrNick/github-tag-action@v1
         env:
